@@ -40,7 +40,7 @@ public class SearchActivity extends Activity {
     String query = null;
     int page = 0;
     int offset = 0;
-    
+    int totalItemCount = 0;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -204,6 +204,7 @@ public class SearchActivity extends Activity {
 	    query = etQuery.getText().toString();
 		Toast.makeText(this, "Searching for " + query, Toast.LENGTH_SHORT)
 		     .show();
+		 searchImages(query, totalItemCount);
 		AsyncHttpClient client = new AsyncHttpClient();
 		//use default settings 
 		if(image == null) {
