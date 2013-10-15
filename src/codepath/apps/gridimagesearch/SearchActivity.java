@@ -37,6 +37,10 @@ public class SearchActivity extends Activity {
     String color = null;
     String type = null;
     String site = null;
+    String query = null;
+    int page = 0;
+    int offset = 0;
+    
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +52,11 @@ public class SearchActivity extends Activity {
 		gvResults.setOnScrollListener(new EndlessScrollListener() {
 			@Override
 			public void onLoadMore(int page, int totalItemCount){
-				//onImageSearch(page);
+			//	onImageSearch(page);
+              searchImages(query, totalItemCount);
 			}
+
+			
 			
 		});
 		gvResults.setOnItemClickListener(new OnItemClickListener() {
@@ -61,10 +68,35 @@ public class SearchActivity extends Activity {
 			   startActivity(i);
 		        }
 		});
-		
 
 	}
 
+	// Populates sets of photos, but doesn't "Load more" 
+	private void searchImages(String query, int totalItemCount) {
+		// TODO Auto-generated method stub
+		 query = etQuery.getText().toString();
+			Toast.makeText(this, "SearchImages method: " + query, Toast.LENGTH_SHORT)
+			     .show();
+			AsyncHttpClient client = new AsyncHttpClient();
+			//use default settings 
+				client.get("https://ajax.googleapis.com/ajax/services/search/images?rsz=8&" + "start=" + totalItemCount + "&v=1.0&q=" + Uri.encode(query), new JsonHttpResponseHandler() {
+					@Override
+					public void onSuccess(JSONObject response) {
+						JSONArray imageJsonResults = null;
+						try {
+							imageJsonResults = response.getJSONObject("responseData").getJSONArray("results");
+							//imageResults.clear();
+							imageAdapter.addAll(ImageResult.fromJSONArray(imageJsonResults));
+							Log.d("DEBUG", imageResults.toString());
+							
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+					}
+					
+				});	
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present
@@ -169,13 +201,13 @@ public class SearchActivity extends Activity {
 		
 	}
 	public void onImageSearch(View v) {
-		String query = etQuery.getText().toString();
+	    query = etQuery.getText().toString();
 		Toast.makeText(this, "Searching for " + query, Toast.LENGTH_SHORT)
 		     .show();
 		AsyncHttpClient client = new AsyncHttpClient();
 		//use default settings 
 		if(image == null) {
-			client.get("https://ajax.googleapis.com/ajax/services/search/images?rsz=8&" + "start=" + 0 + "&v=1.0&q=" + Uri.encode(query), new JsonHttpResponseHandler() {
+			client.get("https://ajax.googleapis.com/ajax/services/search/images?rsz=8&" + "start=" + page + "&v=1.0&q=" + Uri.encode(query), new JsonHttpResponseHandler() {
 				@Override
 				public void onSuccess(JSONObject response) {
 					JSONArray imageJsonResults = null;
@@ -189,13 +221,13 @@ public class SearchActivity extends Activity {
 						e.printStackTrace();
 					}
 				}
-				
+
 			});	
 		}
 		// use saved settings
 			else{
 				
-				client.get("https://ajax.googleapis.com/ajax/services/search/images?rsz=8&" + "start=" + 0 + "&v=1.0&q=" + Uri.encode(query) + "&imgcolor=" + color + "&imgs=" + image + "&imgtype=" + type + "&as_sitesearch=" + site, new JsonHttpResponseHandler() {
+				client.get("https://ajax.googleapis.com/ajax/services/search/images?rsz=8&" + "start=" + page + "&v=1.0&q=" + Uri.encode(query) + "&imgcolor=" + color + "&imgs=" + image + "&imgtype=" + type + "&as_sitesearch=" + site, new JsonHttpResponseHandler() {
 					@Override
 					public void onSuccess(JSONObject response) {
 						JSONArray imageJsonResults = null;
